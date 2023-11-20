@@ -66,11 +66,24 @@ void Fahrzeug::vSimulieren()
     if (deltaZeit > 0) {
         double dTempGeschwindigkeit = dGeschwindigkeit(); // Aktüel hızı al
         double dStreckeDiesesIntervall = dTempGeschwindigkeit * deltaZeit; // Yeni mesafeyi hesapla
+        double dStrecke = p_pVerhalten->dStrecke(*this, deltaZeit);
 
-        p_dGesamtStrecke += dStreckeDiesesIntervall; // Yeni mesafeyi hesapla
+        if (p_dGesamtStrecke + dStreckeDiesesIntervall >= p_pVerhalten->getWeg().getLaenge())
+           {
+                    p_dGesamtStrecke = p_pVerhalten->getWeg().getLaenge(); // Yolu tamamla
+                    std::cout << "Fahrzeug " << getName() << " hat das Ende des Weges erreicht." << std::endl;
+           }
+        else
+        	{
+                    p_dGesamtStrecke += dStreckeDiesesIntervall; // Yeni mesafeyi hesapla
+            }
+
+
+
         p_dAbschnittStrecke += dStreckeDiesesIntervall;
         p_dGesamtZeit += deltaZeit;
-        p_dZeit = dGlobaleZeit; // Son işlem zamanını güncelle
+        p_dZeit = dGlobaleZeit; // Son işlem zamanını güncelle,
+
 
     }
     std::cout << "Fahrzeug " << p_sName << " hat " << p_dGesamtStrecke << " km kat etti." << std::endl;

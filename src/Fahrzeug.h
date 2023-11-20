@@ -69,6 +69,10 @@ public:
     {
     	return p_dAbschnittStrecke;
     }
+    double getGesamtStrecke() const
+    {
+    	return	p_dGesamtStrecke;
+    }
 
     void vNeueStrecke(Weg& weg); // Yeni fonksiyon
 

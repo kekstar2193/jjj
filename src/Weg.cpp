@@ -78,6 +78,8 @@ double Weg::dGeschwindigkeit() const {
 void Weg::vAnnahme(std::unique_ptr<Fahrzeug> pFzg) {
     pFzg->vNeueStrecke(*this);
     p_pFahrzeuge.push_back(std::move(pFzg));
+    std::cout << "Fahrzeug " << pFzg->getName() << " hat den Weg " << p_sName << " betreten." << std::endl;
+
 }
 
 void Weg::vAnnahme(std::unique_ptr<Fahrzeug> fahrzeug, double startzeit) {

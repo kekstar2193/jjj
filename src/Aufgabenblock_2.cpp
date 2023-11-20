@@ -14,6 +14,9 @@
 #include "PKW.h"
 #include "Fahrrad.h"
 #include "Weg.h"
+#include "Fahren.h"
+#include "Parken.h"
+#include "Verhalten.h"
 
 using namespace std;
 
@@ -113,13 +116,46 @@ void vAufgabe5() {
     // ...
 }
 
+void vAufgabe6() {
+    // Yolları oluştur
+    Weg autobahn("Autobahn", 500); // 500 km uzunluğunda
+    Weg landstrasse("Landstrasse", 300); // 300 km uzunluğunda
+
+    // Araçları oluştur
+    Fahrzeug auto1("Auto1", 120); // Saatte 120 km hızla
+    Fahrzeug auto2("Auto2", 90); // Saatte 90 km hızla
+
+    // Araçlara davranışları ata
+    auto1.vNeueStrecke(autobahn);
+    auto2.vNeueStrecke(landstrasse, 0.0833); // 5 dakika sonra başlayacak (0.0833 saat)
+
+    const double zeittakt = 0.25; // 15 dakika (0.25 saat)
+    const double gesamtZeit = 10; // 10 saat için simülasyon
+
+    while (dGlobaleZeit < gesamtZeit) {
+        dGlobaleZeit += zeittakt;
+
+        // Araçların simülasyonunu gerçekleştir
+        auto1.vSimulieren();
+        auto2.vSimulieren();
+
+        // Araçların güncel durumlarını yazdır
+        std::cout << "Zeit: " << dGlobaleZeit << " Stunden" << std::endl;
+        std::cout << "Fahrzeug " << auto1.getName() << " hat " << auto1.getGesamtStrecke() << " km kat etti." << std::endl;
+        std::cout << "Fahrzeug " << auto2.getName() << " hat " << auto2.getGesamtStrecke() << " km kat etti." << std::endl;
+    }
+}
+
 
 
 int main() {
 	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
 	//vAufgabe2();
 	//vAufgabe4();
-	vAufgabe5();
+	//vAufgabe5();
+
+	vAufgabe6();
+
 	return 0;
 }
 
