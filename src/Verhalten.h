@@ -14,6 +14,9 @@
 #include <list>
 #include <memory>
 #include "Simulationsobjekt.h"
+#include "Fahrausnahme.h"
+#include "vertagt_aktion.h"
+#include "vertagt_liste.h"
 
 
 class Fahrzeug;
@@ -25,7 +28,7 @@ private:
 
 public:
     Verhalten(Weg& weg) : p_Weg(weg) {}
-    Weg& getWeg() const { return p_Weg; }
+    Weg& getWeg() const { return p_Weg;  }
 
     virtual double dStrecke(Fahrzeug& fzg, double dZeitIntervall) = 0;
 

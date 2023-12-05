@@ -17,6 +17,8 @@
 #include "Verhalten.h"
 #include "Weg.h"
 #include "Tempolimit.h"
+#include "vertagt_aktion.h"
+#include "vertagt_liste.h"
 
 extern double dGlobaleZeit; // Global zaman değişkeni
 
@@ -73,11 +75,16 @@ public:
     {
     	return	p_dGesamtStrecke;
     }
+    double getGesamtzeit() const
+    {
+    	return p_dGesamtZeit;
+    }
 
     void vNeueStrecke(Weg& weg); // Yeni fonksiyon
 
     void vNeueStrecke(Weg& weg, double startzeit);
 
+    virtual void vZeichnen(const Weg& weg) const {}
 
 
 };

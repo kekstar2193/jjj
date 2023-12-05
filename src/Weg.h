@@ -14,6 +14,13 @@
 #include "Tempolimit.h"
 #include <list>
 #include <memory>
+#include "Fahrausnahme.h"
+#include <string>
+#include <iomanip>
+#include <algorithm>
+#include <vector>
+#include "vertagt_liste.h"
+#include "vertagt_aktion.h"
 
 
 class Fahrzeug;
@@ -23,7 +30,7 @@ class Weg;
 class Weg : public Simulationsobjekt {
 private:
     double p_dLaenge;
-    std::list<std::unique_ptr<Fahrzeug>> p_pFahrzeuge;
+    vertagt::VListe<std::unique_ptr<Fahrzeug>> p_pFahrzeuge;
     Tempolimit p_eTempolimit;
 
 public:
@@ -31,7 +38,10 @@ public:
     Weg(const std::string& name, double laenge, Tempolimit tempolimit = Tempolimit::Autobahn);
 
     double getTempolimit() const;
-    const std::string& getName() const;
+    const std::string& getName() const
+        {
+            return p_sName;
+        }
 
     virtual void vSimulieren() override;
     virtual void vAusgeben(std::ostream& os) const override;
@@ -45,6 +55,13 @@ public:
     {
     	return p_dLaenge;
     }
+
+    const vertagt::VListe<std::unique_ptr<Fahrzeug>>& getFahrzeuge() {
+            return p_pFahrzeuge;
+        }
+    //void vAbgabe(const Fahrzeug& pFzg);
+    std::unique_ptr<Fahrzeug> vAbgabe(const Fahrzeug& fzg);
+
 };
 
 std::ostream& operator<<(std::ostream& os, const Weg& weg);

@@ -27,7 +27,14 @@ Fahrzeug::Fahrzeug(std::string name) : Simulationsobjekt(name), p_dMaxGeschwindi
 }
 
 double Fahrzeug::dGeschwindigkeit() const {
-    return p_dMaxGeschwindigkeit; // PKW her zaman maksimum hızda hareket eder
+
+    double limit = p_pVerhalten->getWeg().dGeschwindigkeit();
+    if (limit <= p_dMaxGeschwindigkeit)
+    {
+        return std::min(p_dMaxGeschwindigkeit, static_cast<double>(limit));
+    }
+
+    return p_dMaxGeschwindigkeit;
 }
 
 Fahrzeug::Fahrzeug(std::string name, double maxGeschwindigkeit) : Simulationsobjekt(name), p_dMaxGeschwindigkeit(maxGeschwindigkeit > 0 ? maxGeschwindigkeit : 0), p_dGesamtStrecke(0.0), p_dGesamtZeit(0.0), p_dAbschnittStrecke(0.0)
@@ -64,23 +71,23 @@ void Fahrzeug::vSimulieren()
 {
     double deltaZeit = dGlobaleZeit - p_dZeit;
     if (deltaZeit > 0) {
-        double dTempGeschwindigkeit = dGeschwindigkeit(); // Aktüel hızı al
-        double dStreckeDiesesIntervall = dTempGeschwindigkeit * deltaZeit; // Yeni mesafeyi hesapla
+        //double dTempGeschwindigkeit = dGeschwindigkeit(); // Aktüel hızı al
+        //double dStreckeDiesesIntervall = dTempGeschwindigkeit * deltaZeit; // Yeni mesafeyi hesapla
         double dStrecke = p_pVerhalten->dStrecke(*this, deltaZeit);
 
-        if (p_dGesamtStrecke + dStreckeDiesesIntervall >= p_pVerhalten->getWeg().getLaenge())
+        if (p_dGesamtStrecke + dStrecke >= p_pVerhalten->getWeg().getLaenge())
            {
                     p_dGesamtStrecke = p_pVerhalten->getWeg().getLaenge(); // Yolu tamamla
                     std::cout << "Fahrzeug " << getName() << " hat das Ende des Weges erreicht." << std::endl;
            }
         else
         	{
-                    p_dGesamtStrecke += dStreckeDiesesIntervall; // Yeni mesafeyi hesapla
+                    p_dGesamtStrecke += dStrecke; // Yeni mesafeyi hesapla
             }
 
 
 
-        p_dAbschnittStrecke += dStreckeDiesesIntervall;
+        p_dAbschnittStrecke += dStrecke;
         p_dGesamtZeit += deltaZeit;
         p_dZeit = dGlobaleZeit; // Son işlem zamanını güncelle,
 
@@ -107,7 +114,7 @@ Fahrzeug& Fahrzeug::operator=(const Fahrzeug& other) {
 
 void Fahrzeug::vNeueStrecke(Weg& weg) {
 	p_pVerhalten = std::make_unique<Fahren>(weg);
-    p_dAbschnittStrecke = 0.0;
+    //p_dAbschnittStrecke = 0.0;
 }
 
 void Fahrzeug::vNeueStrecke(Weg& weg, double startzeit) {

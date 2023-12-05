@@ -10,6 +10,7 @@
 
 #include "Fahrzeug.h"
 #include <limits>
+#include "SimuClient.h"
 
 class PKW : public Fahrzeug {
 
@@ -24,6 +25,8 @@ public:
     virtual ~PKW();
     virtual void vAusgeben(std::ostream& os) const override;
     virtual void vSimulieren() override;
+    double dGeschwindigkeit() const override;
+    void vZeichnen(const Weg& weg) const override;
 
 };
 

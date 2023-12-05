@@ -10,6 +10,8 @@
 
 
 #include "Fahrzeug.h"
+#include "SimuClient.h"
+
 
 class Fahrrad : public Fahrzeug {
 public:
@@ -18,6 +20,7 @@ public:
     virtual void vAusgeben(std::ostream& os) const override;
     virtual void vSimulieren() override;
     virtual double dGeschwindigkeit() const override;
+    void vZeichnen(const Weg& weg) const override;
     // Fahrrad'a özgü diğer üye fonksiyonlar...
 };
 

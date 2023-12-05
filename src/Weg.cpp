@@ -8,6 +8,9 @@
 
 #include "Weg.h"
 #include <iostream>
+#include "vertagt_aktion.h"
+#include "vertagt_liste.h"
+
 
 Weg::Weg() : Simulationsobjekt(""), p_dLaenge(0.0), p_eTempolimit(Tempolimit::Autobahn) {} // @suppress("Symbol is not resolved")
 
@@ -28,9 +31,24 @@ std::ostream& operator<<(std::ostream& os, const Weg& weg)
 	return os;
 };
 void Weg::vSimulieren() {
-    for (auto& fahrzeug : p_pFahrzeuge) {
+    try
+    {
+    	if (p_pFahrzeuge.empty())
+    {
+    		std::cout << "Keine Fahrzeuge auf dem Weg: " << p_sName << std::endl;
+    		return;
+    }
+
+    	for (auto& fahrzeug : p_pFahrzeuge)
+    	{
         fahrzeug->vSimulieren();
-        std::cout << fahrzeug->getName() << " ";
+
+        //std::cout << fahrzeug->getName() << " ";
+    	}
+    	p_pFahrzeuge.vAktualisieren();
+    }
+    catch (Fahrausnahme& e){
+    	e.vBearbeiten();
     }
     std::cout << std::endl;
 }
@@ -38,15 +56,30 @@ void Weg::vSimulieren() {
 void Weg::vAusgeben(std::ostream& os) const {
     Simulationsobjekt::vAusgeben(os);
     os << std::left
-          << std::setw(10) << "Länge:"
-          << std::right << std::setw(6) << p_dLaenge << " km"
-          << std::left << ", Fahrzeuge: ";
+       << std::setw(10) << "ID"
+       << " | "
+       << std::setw(12) << "Name"
+       << " | "
+       << std::setw(8) << "Laenge"
+       << " | "
+       << "Fahrzeuge"
+       << '\n'
+       << std::setfill('*') << std::setw(50) << "" << std::setfill(' ') << '\n';
+
+    os << std::left
+       << std::setw(10) << p_iID
+       << " | "
+       << std::setw(12) << p_sName
+       << " | "
+       << std::setw(8) << p_dLaenge
+       << " | ";
 
     for (const auto& fahrzeug : p_pFahrzeuge) {
         os << fahrzeug->getName() << " ";
     }
     os << std::endl;
 }
+
 
 void Weg::vKopf() {
 
@@ -76,16 +109,26 @@ double Weg::dGeschwindigkeit() const {
 }
 
 void Weg::vAnnahme(std::unique_ptr<Fahrzeug> pFzg) {
+    std::cout << "Fahrzeug " << pFzg->getName() << " hat den Weg " << p_sName << " betreten." << std::endl;
     pFzg->vNeueStrecke(*this);
     p_pFahrzeuge.push_back(std::move(pFzg));
-    std::cout << "Fahrzeug " << pFzg->getName() << " hat den Weg " << p_sName << " betreten." << std::endl;
-
 }
 
 void Weg::vAnnahme(std::unique_ptr<Fahrzeug> fahrzeug, double startzeit) {
-    // Park eden araçları listenin başına ekle
+    std::cout << "Fahrzeug " << fahrzeug->getName() << " parken " << p_sName << " betreten." << std::endl;
+    fahrzeug->vNeueStrecke(*this, startzeit);
     p_pFahrzeuge.push_front(std::move(fahrzeug));
-    // Park eden araç için başlangıç zamanını ayarla (bu kısım Fahrzeug sınıfında bir ayarlama gerektirebilir)
+}
+
+std::unique_ptr<Fahrzeug> Weg::vAbgabe(const Fahrzeug& fzg) {
+    for (auto it = p_pFahrzeuge.begin(); it != p_pFahrzeuge.end(); ++it) {
+        if ((*it).get() == &fzg) {
+            auto ptr = std::move(*it);
+            p_pFahrzeuge.erase(it);
+            return ptr;
+        }
+    }
+    return nullptr;
 }
 
 

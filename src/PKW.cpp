@@ -46,7 +46,7 @@ void PKW::vSimulieren() {
         // Bu adımda geçen süreyi hesapla
         //double deltaZeit = dGlobaleZeit - p_dZeit;
 
-        double strecke = p_dMaxGeschwindigkeit * deltaZeit; // Bu adımda alınan yol
+        double strecke = dGeschwindigkeit() * deltaZeit; // Bu adımda alınan yol
         double verbrauch = strecke * p_dVerbrauch / 100; // 100 km başına tüketim
 
         // Tank içeriğini güncelle
@@ -63,4 +63,21 @@ void PKW::vSimulieren() {
     } else {
         std::cout << p_sName << " hat keinen Treibstoff mehr und bleibt stehen.\n";
     }
+}
+
+double PKW::dGeschwindigkeit() const {
+     // PKW'nin bir Verhalten nesnesi varsa
+        double limit = p_pVerhalten->getWeg().getTempolimit();
+        if (limit <= p_dMaxGeschwindigkeit)
+        {
+            return std::min(p_dMaxGeschwindigkeit, static_cast<double>(limit));
+        }
+
+    return p_dMaxGeschwindigkeit;
+}
+
+void PKW::vZeichnen(const Weg& weg) const{
+
+	bZeichnePKW(getName().c_str(), weg.getName().c_str(), p_dGesamtStrecke/weg.getLaenge(), dGeschwindigkeit(), p_dTankinhalt);
+
 }

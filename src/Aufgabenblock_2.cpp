@@ -17,82 +17,10 @@
 #include "Fahren.h"
 #include "Parken.h"
 #include "Verhalten.h"
+#include "SimuClient.h"
+
 
 using namespace std;
-
-
-void vAufgabe2() {
-    std::vector<std::unique_ptr<Fahrzeug>> vFahrzeuge;
-    int anzahlPKW, anzahlFahrrad;
-    std::string name;
-    double maxGeschwindigkeit, verbrauch, tankvolumen;
-
-    std::cout << "Anzahl der PKWs: ";
-    std::cin >> anzahlPKW;
-    for (int i = 0; i < anzahlPKW; ++i) {
-        std::cout << "PKW #" << i+1 << " Name: ";
-        std::cin >> name;
-        std::cout << "Maximalgeschwindigkeit: ";
-        std::cin >> maxGeschwindigkeit;
-        std::cout << "Verbrauch (Liter/100km): ";
-        std::cin >> verbrauch;
-        std::cout << "Tankvolumen (optional, Default=55): ";
-        std::cin >> tankvolumen;
-        vFahrzeuge.push_back(std::make_unique<PKW>(name, maxGeschwindigkeit, verbrauch, tankvolumen));
-    }
-
-    std::cout << "Anzahl der Fahrraeder: ";
-    std::cin >> anzahlFahrrad;
-    for (int i = 0; i < anzahlFahrrad; ++i) {
-        std::cout << "Fahrrad #" << i+1 << " Name: ";
-        std::cin >> name;
-        std::cout << "Maximalgeschwindigkeit: ";
-        std::cin >> maxGeschwindigkeit;
-        vFahrzeuge.push_back(std::make_unique<Fahrrad>(name, maxGeschwindigkeit));
-    }
-
-    const double zeittakt = 0.3; // 15 Minuten
-    const double gesamtZeit = 10; // 5 Stunden für die Simulation
-    const double tankZeit = 3.0; // Nach 3 Stunden tanken
-    double epsilon = 0.001; // Toleranz für double-Vergleiche
-
-
-    while (dGlobaleZeit < gesamtZeit) {
-
-
-           if (std::fabs(dGlobaleZeit - tankZeit) < epsilon) {
-                for (auto& fahrzeug : vFahrzeuge) {
-                    // Fahrzeug'un PKW olup olmadığını kontrol et
-                    PKW* pkw = dynamic_cast<PKW*>(fahrzeug.get());
-                    if (pkw) {
-                        // PKW ise tankı doldur
-                        pkw->dTanken(std::numeric_limits<double>::infinity()); // Sonsuz miktar vererek tamamen doldur
-                        fahrzeug->vAusgeben(std::cout);
-                    }
-                }
-            }
-
-           dGlobaleZeit += zeittakt;
-
-           for (auto& fahrzeug : vFahrzeuge) {
-               Fahrzeug::vKopf();
-        	   fahrzeug->vSimulieren(); // Simülasyon fonksiyonu
-               fahrzeug->vAusgeben(std::cout);   // Ausgabe fonksiyonu
-           }
-
-           std::cout << "Globale Zeit: " << dGlobaleZeit << " Stunden\n";
-
-       }
-}
-
-
-void vAufgabe4() {
-    // Weg nesnesi oluşturma
-    Weg meinWeg("Hauptstrasse", 10.0, Tempolimit::Innerorts);
-
-    // Weg nesnesini standart çıktıya yazdırma
-    std::cout << meinWeg << std::endl;
-}
 
 void vAufgabe5() {
     Weg meinWeg("Autobahn", 500);
@@ -105,57 +33,184 @@ void vAufgabe5() {
     meinWeg.vAnnahme(std::move(fzg2));
     meinWeg.vAnnahme(std::move(fzg3));
 
-    for (int i = 0; i < 10; ++i) { // Örnek olarak 10 adım simülasyon
-        std::cout << "Simülasyon Adımı: " << i + 1 << std::endl;
-        meinWeg.vSimulieren();
-        // Diğer çıktılar...
-        std::cout << "---------------------------------" << std::endl;
-    }
+    const double zeittakt = 0.25; // 15 dakika (0.25 saat)
+    const double gesamtZeit = 10; // 10 saat için simülasyon
 
+    while (dGlobaleZeit < gesamtZeit){
+    	dGlobaleZeit += zeittakt;
+
+    	meinWeg.vSimulieren();
+    }
     // Sonuçların görüntülenmesi
     // ...
 }
-
 void vAufgabe6() {
-    // Yolları oluştur
-    Weg autobahn("Autobahn", 500); // 500 km uzunluğunda
-    Weg landstrasse("Landstrasse", 300); // 300 km uzunluğunda
+    Weg autobahn("Autobahn", 500); // 500 km uzunluğunda bir yol
 
     // Araçları oluştur
-    Fahrzeug auto1("Auto1", 120); // Saatte 120 km hızla
-    Fahrzeug auto2("Auto2", 90); // Saatte 90 km hızla
+    auto bmw = std::make_unique<Fahrzeug>("BMW", 100);
+    auto audi = std::make_unique<Fahrzeug>("Audi", 120);
 
-    // Araçlara davranışları ata
-    auto1.vNeueStrecke(autobahn);
-    auto2.vNeueStrecke(landstrasse, 0.0833); // 5 dakika sonra başlayacak (0.0833 saat)
+    // Araçları yola ekle
+    autobahn.vAnnahme(std::move(bmw)); // BMW, 1 saat sonra yola çıkacak
+    autobahn.vAnnahme(std::move(audi),1); // Audi hemen yola çıkacak
 
     const double zeittakt = 0.25; // 15 dakika (0.25 saat)
-    const double gesamtZeit = 10; // 10 saat için simülasyon
+    const double gesamtZeit = 10; // Toplam 2 saat için simülasyon
+
+    while (dGlobaleZeit < gesamtZeit){
+        	dGlobaleZeit += zeittakt;
+
+        	autobahn.vSimulieren();
+
+        	autobahn.vAusgeben(std::cout);
+
+        	std::cout << "Globale Zeit: " << dGlobaleZeit << " Stunden\n";
+        }
+}
+
+void vAufgabe8() {
+    Weg autobahn("Autobahn", 500); // 500 km uzunluğunda bir yol
+
+    // Araçları oluştur
+    auto bmw = std::make_unique<Fahrzeug>("BMW", 100);
+    auto audi = std::make_unique<Fahrzeug>("Audi", 120);
+
+    // Araçları yola ekle
+    autobahn.vAnnahme(std::move(bmw)); // BMW hemen yola çıkacak
+    autobahn.vAnnahme(std::move(audi)); // Audi hemen yola çıkacak
+
+    const double zeittakt = 0.25; // 15 dakika (0.25 saat)
+    const double gesamtZeit = 5; // Toplam 5 saat için simülasyon
+    bool bmwHatGeparkt = false;
 
     while (dGlobaleZeit < gesamtZeit) {
         dGlobaleZeit += zeittakt;
 
-        // Araçların simülasyonunu gerçekleştir
-        auto1.vSimulieren();
-        auto2.vSimulieren();
+        if (!bmwHatGeparkt && dGlobaleZeit >= 2.0) {
+            // BMW'yi 2 saat sonra 1 saatliğine park et
+            auto bmwPark = std::make_unique<Fahrzeug>("BMW", 100);
+            autobahn.vAnnahme(std::move(bmwPark), 1.0); // BMW 1 saatliğine park eder
+            bmwHatGeparkt = true;
+        }
 
-        // Araçların güncel durumlarını yazdır
-        std::cout << "Zeit: " << dGlobaleZeit << " Stunden" << std::endl;
-        std::cout << "Fahrzeug " << auto1.getName() << " hat " << auto1.getGesamtStrecke() << " km kat etti." << std::endl;
-        std::cout << "Fahrzeug " << auto2.getName() << " hat " << auto2.getGesamtStrecke() << " km kat etti." << std::endl;
+        autobahn.vSimulieren();
+
+        autobahn.vAusgeben(std::cout);
+
+        std::cout << "Globale Zeit: " << dGlobaleZeit << " Stunden\n";
     }
 }
 
 
+
+void vAufgabe7(){
+    std::vector<std::unique_ptr<Fahrzeug>> vFahrzeuge;
+    int anzahlFahrzeuge;
+    std::string name;
+    double maxGeschwindigkeit, startzeit;
+    Weg autobahn("Autobahn", 500); // 500 km uzunluğunda
+    Weg landstrasse("Landstrasse", 300); // 300 km uzunluğunda
+
+    std::cout << "Anzahl der Fahrzeuge: ";
+    std::cin >> anzahlFahrzeuge;
+    for (int i = 0; i < anzahlFahrzeuge; ++i) {
+        std::cout << "Fahrzeug #" << i+1 << " Name: ";
+        std::cin >> name;
+        std::cout << "Maximalgeschwindigkeit: ";
+        std::cin >> maxGeschwindigkeit;
+        std::cout << "Startzeit (in Stunden, 0 für sofort): ";
+        std::cin >> startzeit;
+
+        if (startzeit == 0) {
+            vFahrzeuge.push_back(std::make_unique<Fahrzeug>(name, maxGeschwindigkeit));
+            vFahrzeuge.back()->vNeueStrecke(autobahn);
+        } else {
+            vFahrzeuge.push_back(std::make_unique<Fahrzeug>(name, maxGeschwindigkeit));
+            vFahrzeuge.back()->vNeueStrecke(landstrasse, startzeit);
+        }
+    }
+
+    const double zeittakt = 0.25; // 15 Minuten
+    const double gesamtZeit = 10; // 10 Stunden für die Simulation
+
+
+    while (dGlobaleZeit < gesamtZeit) {
+        dGlobaleZeit += zeittakt;
+
+        for (auto& fahrzeug : vFahrzeuge) {
+            fahrzeug->vSimulieren();
+
+        }
+
+        std::cout << "Globale Zeit: " << dGlobaleZeit << " Stunden\n";
+    }
+}
+
+void vAufgabe_9() {
+    // Yolları oluştur
+    Weg autobahn("Autobahn", 500, Tempolimit::Autobahn); // Tempolimitsiz yol
+    Weg landstrasse("Landstras", 500, Tempolimit::Landstrasse); // 100 km/h limitli yol
+
+    // Araçları oluştur
+    auto bmw = std::make_unique<PKW>("BMW", 150, 2, 55);
+    auto audi = std::make_unique<PKW>("Audi", 120, 2, 55);
+    auto mercedes = std::make_unique<PKW>("Mercedes", 130,2,55);
+
+    // Araçları yollara yerleştir
+    autobahn.vAnnahme(std::unique_ptr<PKW>(std::move(bmw))); // BMW hemen hareket eder
+    landstrasse.vAnnahme(std::unique_ptr<PKW>(std::move(audi)), 1); // Audi, 2 saat sonra hareket eder
+    landstrasse.vAnnahme(std::unique_ptr<PKW>(std::move(mercedes)), 3); // Mercedes, 1 saat sonra hareket eder
+
+    int koordinaten[] = {700,250,100,250};
+    int koordinaten2[] = {500,150,200,150};
+    bInitialisiereGrafik(800,500);
+
+    bZeichneStrasse("Autobahn","Landstras", 500, 2 , koordinaten);
+    //bZeichneStrasse("Strashin1","Strasruek1", 500, 2 , koordinaten2);
+
+   // bZeichnePKW("Audi","Autohin1", 0.5,120, 55);
+
+    const double zeittakt = 0.25; // 15 dakika (0.25 saat)
+    const double gesamtZeit = 5; // Toplam 5 saat için simülasyon
+
+vSleep(2000);
+    // Simülasyon döngüsü
+    while (dGlobaleZeit < gesamtZeit) {
+        	dGlobaleZeit += zeittakt;
+
+           vSetzeZeit(dGlobaleZeit);
+
+
+
+
+            autobahn.vSimulieren();
+            landstrasse.vSimulieren();
+            autobahn.vAusgeben(std::cout);
+            landstrasse.vAusgeben(std::cout);
+
+            for (const auto& fahrzeug : autobahn.getFahrzeuge()) {
+                fahrzeug->vZeichnen(autobahn);
+            }
+            for (const auto& fahrzeug : landstrasse.getFahrzeuge()) {
+                fahrzeug->vZeichnen(landstrasse);
+            }
+
+
+            vSleep(1000);
+        std::cout << "Globale Zeit: " << dGlobaleZeit << " Stunden\n";
+    }
+    vBeendeGrafik();
+}
 
 int main() {
 	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
 	//vAufgabe2();
 	//vAufgabe4();
 	//vAufgabe5();
-
-	vAufgabe6();
-
+	//vAufgabe6();
+	//vAufgabe7();
+    vAufgabe_9();
 	return 0;
 }
 

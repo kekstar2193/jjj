@@ -5,6 +5,7 @@
  *      Author: kekillialiresid
  */
 #include "Fahrrad.h"
+#include "SimuClient.h"
 
 
 Fahrrad::Fahrrad(std::string name, double maxGeschwindigkeit)
@@ -32,3 +33,12 @@ double Fahrrad::dGeschwindigkeit() const {
     }
     return std::max(dAktuelleGeschwindigkeit, 12.0); // Minimum hız 12 km/sa
 }
+
+void Fahrrad::vZeichnen(const Weg& weg) const {
+    double relPosition = getAbschnittStrecke() / weg.getLaenge();
+    bZeichneFahrrad(getName(), weg.getName(), relPosition, dGeschwindigkeit());
+}
+
+
+
+
